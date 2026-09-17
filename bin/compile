@@ -7,14 +7,14 @@ set -o pipefail
 export_env_dir() {
   env_dir=$1
   if [ -d "$env_dir" ]; then
-    for e in $(ls $env_dir); do
-      export "$e=$(cat $env_dir/$e)"
-      :
+    for e in "$env_dir"/*; do
+      [ -f "$e" ] || continue
+      export "$(basename "$e")=$(cat "$e")"
     done
   fi
 }
 
-export_env_dir $3
+export_env_dir "$3"
 
 # START CONFIG
 
@@ -58,28 +58,34 @@ function indent() {
 
 BUILD_DIR=$1
 CACHE_DIR=$2
-mkdir -p $BUILD_DIR $CACHE_DIR
+
+if [ -z "$BUILD_DIR" ] || [ -z "$CACHE_DIR" ]; then
+  echo "Usage: bin/compile BUILD_DIR CACHE_DIR ENV_DIR" >&2
+  exit 1
+fi
+
+mkdir -p "$BUILD_DIR" "$CACHE_DIR"
 
 # Nginx
-cd ${BUILD_DIR}
+cd "$BUILD_DIR"
 if [ ! -d ./vendor/nginx ]; then
   echo "-----> Installing Nginx v${NGINX_VERSION}"
   mkdir -p ./vendor/nginx && cd ./vendor/nginx
-  curl --silent --max-time 60 --location $NGINX_URL | tar xz
+  curl --silent --max-time 60 --location "$NGINX_URL" | tar xz
 fi
 
 # PHP
-cd ${BUILD_DIR}
+cd "$BUILD_DIR"
 if [ ! -d ./vendor/php ]; then
   echo "-----> Installing PHP v${PHP_VERSION}"
   mkdir -p ./vendor/php && cd ./vendor/php
-  curl --silent --max-time 60 --location $PHP_URL | tar xz
+  curl --silent --max-time 60 --location "$PHP_URL" | tar xz
 fi
 
 # WordPress
 echo "-----> Installing WordPress v${WORDPRESS_VERSION}"
-cd ${BUILD_DIR}
-curl --silent --max-time 60 --location $WORDPRESS_URL | tar xz
+cd "$BUILD_DIR"
+curl --silent --max-time 60 --location "$WORDPRESS_URL" | tar xz
 
 # Support installation of WordPress into a subdirectory instead of the docroot
 if [ -n "$WORDPRESS_DIR" ]; then
@@ -94,8 +100,8 @@ else
 fi
 
 echo "-----> Writing start.sh script"
-mkdir -p ${BUILD_DIR}/bin
-cd ${BUILD_DIR}
+mkdir -p "$BUILD_DIR/bin"
+cd "$BUILD_DIR"
 
 # Setup
 cat >>bin/setup.sh <<EOF

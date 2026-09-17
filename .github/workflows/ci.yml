@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    name: Test suite + shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the buildpack
+        uses: actions/checkout@v4
+
+      - name: Run the buildpack test suite
+        # The suite is hermetic: tests/bin/curl stubs the downloads that
+        # bin/compile performs, so no network or Docker is required.
+        run: bash test.sh
+
+      - name: Lint shell scripts with shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          shellcheck \
+            bin/compile \
+            bin/detect \
+            bin/release \
+            support/package_nginx \
+            support/package_php \
+            support/wordup \
+            support/aws/s3 \
+            support/aws/hmac \
+            test.sh \
+            tests/detect_test.sh \
+            tests/release_test.sh \
+            tests/compile_test.sh \
+            tests/bin/curl

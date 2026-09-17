@@ -1,23 +1,23 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
-if [ "$PHP_VERSION" == "" ]; then
+if [ -z "$PHP_VERSION" ]; then
   echo "must set PHP_VERSION, i.e PHP_VERSION=5.4.1"
   exit 1
 fi
 
-if [ "$AWS_ID" == "" ]; then
+if [ -z "$AWS_ID" ]; then
   echo "must set AWS_ID, i.e. export AWS_ID=1BHAJK48DJFMQKZMNV93"
   exit 1
 fi
 
-if [ "$AWS_SECRET" == "" ]; then
+if [ -z "$AWS_SECRET" ]; then
   echo "must set AWS_SECRET, i.e. export AWS_SECRET=fj2jjchebsjksmMJCN387RHNjdnddNfi4jjhshh3"
   exit 1
 fi
 
-if [ "$S3_BUCKET" == "" ]; then
+if [ -z "$S3_BUCKET" ]; then
   echo "must set S3_BUCKET, i.e. S3_BUCKET=heroku-buildpack-wordpress"
   exit 1
 fi
@@ -26,16 +26,16 @@ basedir="$( cd -P "$( dirname "$0" )" && pwd )"
 
 # make a temp directory
 tempdir="$( mktemp -t php_XXXX )"
-rm -rf $tempdir
-mkdir -p $tempdir
-pushd $tempdir
+rm -rf "$tempdir"
+mkdir -p "$tempdir"
+pushd "$tempdir"
 
 # download and extract php
 curl -L http://us.php.net/get/php-$PHP_VERSION.tar.bz2/from/www.php.net/mirror -o php.tgz
 tar xzvf php.tgz
 
 # build and package php for heroku
-vulcan build -v -s php-$PHP_VERSION -o $tempdir/php-$PHP_VERSION-with-fpm-heroku.tar.gz -p /app/vendor/php -c \
+vulcan build -v -s php-$PHP_VERSION -o "$tempdir/php-$PHP_VERSION-with-fpm-heroku.tar.gz" -p /app/vendor/php -c \
   "./configure  --prefix=/app/vendor/php \
                 --with-mysql \
                 --with-pdo-mysql \
@@ -70,4 +70,4 @@ vulcan build -v -s php-$PHP_VERSION -o $tempdir/php-$PHP_VERSION-with-fpm-heroku
                 && yes '' | /app/vendor/php/bin/pecl install memcache"
 
 # upload to s3
-$basedir/aws/s3 put $S3_BUCKET php-$PHP_VERSION-with-fpm-heroku.tar.gz $tempdir/php-$PHP_VERSION-with-fpm-heroku.tar.gz
+"$basedir/aws/s3" put "$S3_BUCKET" "php-$PHP_VERSION-with-fpm-heroku.tar.gz" "$tempdir/php-$PHP_VERSION-with-fpm-heroku.tar.gz"

@@ -1,0 +1,12 @@
+# Keep GitHub Actions up to date.
+#
+# The buildpack itself has no package-manager dependencies: Nginx, PHP,
+# and WordPress are downloaded as prebuilt tarballs at compile time and
+# pinned via the NGINX_VERSION / PHP_VERSION / WORDPRESS_VERSION defaults
+# in bin/compile (see VERSIONS.md).
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

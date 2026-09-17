@@ -92,6 +92,9 @@ A few WordPress environment variables can be controlled via Heroku using `heroku
 
 > To add a Heroku environment variable: `heroku config:set GOOG_UA_ID=UA=1234777-9`
 
+Every variable the buildpack reads — compile-time and runtime — is listed
+with example values in [`.env.example`](.env.example).
+
 See `wp-config.php` and documentation from WordPress for details.
 
 Enabling and configuring the following WordPress plugins will also speed up WordPress on Heroku significantly.
@@ -287,6 +290,31 @@ Not comfortable downloading and running a copy of someone else's PHP or Nginx ex
 * `package_nginx` - Used to compile and upload the latest version of Nginx to S3.
 * `package_php` - Used to compile and upload the latest version of PHP to S3.
 * `wordup` - Really useful helper script for creating and destroying WordPress sites.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run the test suite and
+lint the scripts before opening a pull request.
+
+## Local testing
+
+The buildpack's test suite is hermetic: it stubs the Nginx/PHP/WordPress
+downloads that `bin/compile` performs, so it runs offline with no Heroku
+account and no Docker.
+
+```bash
+./test.sh
+```
+
+It exercises `bin/detect`, `bin/release`, and `bin/compile` (including the
+`WORDPRESS_DIR` and `ENV_DIR` paths) and exits non-zero on any failure.
+CI runs the same suite plus ShellCheck on every push.
+
+For a full end-to-end run that mimics the Heroku stack, a `Dockerfile` and
+`docker-compose.yml` are included. They build a container with the
+toolchain `bin/compile` needs and run the test suite inside it:
+
+```bash
+docker compose up --build
+```
 
 ## TODO
 

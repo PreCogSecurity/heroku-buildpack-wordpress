@@ -1,7 +1,11 @@
 #!/bin/sh
-# Usage: bin/compile <build-dir>
+# Usage: bin/detect <build-dir>
 
-if [ -f $1/config/public/wp-config.php ]; then
+if [ $# -lt 1 ]; then
+  exit 1
+fi
+
+if [ -f "$1/config/public/wp-config.php" ]; then
   echo "WordPress"
   exit 0
 else

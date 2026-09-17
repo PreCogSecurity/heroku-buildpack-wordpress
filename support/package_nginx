@@ -1,23 +1,23 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
-if [ "$NGINX_VERSION" == "" ]; then
+if [ -z "$NGINX_VERSION" ]; then
   echo "must set NGINX_VERSION, i.e NGINX_VERSION=1.2.0"
   exit 1
 fi
 
-if [ "$AWS_ID" == "" ]; then
+if [ -z "$AWS_ID" ]; then
   echo "must set AWS_ID, i.e. export AWS_ID=1BHAJK48DJFMQKZMNV93"
   exit 1
 fi
 
-if [ "$AWS_SECRET" == "" ]; then
+if [ -z "$AWS_SECRET" ]; then
   echo "must set AWS_SECRET, i.e. export AWS_SECRET=fj2jjchebsjksmMJCN387RHNjdnddNfi4jjhshh3"
   exit 1
 fi
 
-if [ "$S3_BUCKET" == "" ]; then
+if [ -z "$S3_BUCKET" ]; then
   echo "must set S3_BUCKET, i.e. S3_BUCKET=heroku-buildpack-wordpress"
   exit 1
 fi
@@ -28,9 +28,9 @@ basedir="$( cd -P "$( dirname "$0" )" && pwd )"
 
 # make a temp directory
 tempdir="$( mktemp -t nginx_XXXX )"
-rm -rf $tempdir
-mkdir -p $tempdir
-pushd $tempdir
+rm -rf "$tempdir"
+mkdir -p "$tempdir"
+pushd "$tempdir"
 
 # download and extract nginx
 curl http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tgz
@@ -43,7 +43,7 @@ tar zvxf pcre.tgz
 popd
 
 # build and package nginx for heroku
-vulcan build -v -s nginx-$NGINX_VERSION -o $tempdir/nginx-$NGINX_VERSION-heroku.tar.gz -p /app/vendor/nginx -c \
+vulcan build -v -s nginx-$NGINX_VERSION -o "$tempdir/nginx-$NGINX_VERSION-heroku.tar.gz" -p /app/vendor/nginx -c \
   "./configure --prefix=/app/vendor/nginx \
                --with-pcre=contrib/pcre-${PCRE_VERSION} \
                --with-http_ssl_module \
@@ -53,4 +53,4 @@ vulcan build -v -s nginx-$NGINX_VERSION -o $tempdir/nginx-$NGINX_VERSION-heroku.
                && make install"
 
 # upload to s3
-$basedir/aws/s3 put $S3_BUCKET nginx-$NGINX_VERSION-heroku.tar.gz $tempdir/nginx-$NGINX_VERSION-heroku.tar.gz
+"$basedir/aws/s3" put "$S3_BUCKET" "nginx-$NGINX_VERSION-heroku.tar.gz" "$tempdir/nginx-$NGINX_VERSION-heroku.tar.gz"
