@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 RETVAL=0
 
@@ -19,13 +19,13 @@ case "$1" in
       instance_name=$2
 
       echo "-----> Installing WordPress on Heroku"
-      git clone git://github.com/mchung/wordpress-on-heroku.git $instance_name | indent
-      cd $instance_name
+      git clone git://github.com/mchung/wordpress-on-heroku.git "$instance_name" | indent
+      cd "$instance_name" || exit 1
 
       echo "-----> Acquiring Heroku dynos"
       heroku create \
          --stack cedar \
-         --buildpack https://github.com/mchung/heroku-buildpack-wordpress.git $instance_name | indent
+         --buildpack https://github.com/mchung/heroku-buildpack-wordpress.git "$instance_name" | indent
 
       echo "-----> Create custom production branch"
       git co -b production
@@ -33,14 +33,14 @@ case "$1" in
       echo "-----> Engage!"
       git push heroku production:master | indent
       echo "Opening http://${instance_name}.herokuapp.com"
-      heroku apps:open --app ${instance_name}
+      heroku apps:open --app "$instance_name"
       ;;
 
    --destroy|-d)
       instance_name=$2
 
       echo "-----> Uninstalling WordPress (${instance_name}) :("
-      heroku destroy --app $instance_name
+      heroku destroy --app "$instance_name"
 
       echo "-----> Your local copy will remain untouched."
       echo ""

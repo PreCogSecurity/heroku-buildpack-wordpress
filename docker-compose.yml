@@ -1,0 +1,13 @@
+# Runs the buildpack test suite in a container that mimics the Heroku
+# stack environment. The suite is hermetic (tests/bin/curl stubs the
+# downloads bin/compile performs), so no backing services are required:
+#
+#   docker compose up --build
+#
+# Exit code 0 means every test passed.
+services:
+  buildpack:
+    build: .
+    volumes:
+      - .:/workspace
+    command: bash test.sh

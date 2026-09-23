@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Test stub for curl(1).
+#
+# bin/compile downloads Nginx, PHP, and WordPress tarballs with:
+#   curl --silent --max-time 60 --location <url> | tar xz
+#
+# This stub intercepts those calls and streams the matching fixture
+# tarball from tests/fixtures instead of hitting the network, so the
+# test suite is fully hermetic and works offline.
+set -euo pipefail
+
+fixtures_dir="$(cd "$(dirname "$0")/../fixtures" && pwd)"
+
+url=""
+for arg in "$@"; do
+  case "$arg" in
+    http://* | https://*) url="$arg" ;;
+  esac
+done
+
+if [ -z "$url" ]; then
+  echo "stub curl: no URL found in arguments: $*" >&2
+  exit 1
+fi
+
+# Match the exact default URLs bin/compile builds (see the NGINX_VERSION,
+# PHP_VERSION, and WORDPRESS_VERSION defaults in bin/compile). Any other
+# URL -- e.g. an overridden version with no fixture -- fails the fetch,
+# which lets tests exercise the failure path.
+case "$url" in
+  *nginx-1.4.2-heroku.tar.gz*) cat "$fixtures_dir/nginx.tar.gz" ;;
+  *php-5.5.2-with-fpm-heroku.tar.gz*) cat "$fixtures_dir/php.tar.gz" ;;
+  *wordpress-3.9.1.tar.gz*) cat "$fixtures_dir/wordpress.tar.gz" ;;
+  *)
+    echo "stub curl: no fixture registered for URL: $url" >&2
+    exit 1
+    ;;
+esac

@@ -4,7 +4,7 @@
 # Copyright 2007 Victor Lowther <victor.lowther@gmail.com>
 
 die() {
-  echo $*
+  echo "$*"
   exit 1
 }
 
@@ -30,6 +30,7 @@ make_hmac_pad() {
   # using key in file $1 and byte in $2, create the appropriate hmac pad
   # Pad keys out to $3 bytes
   # if key is longer than $3, use hash $4 to hash the key first.
+  # shellcheck disable=SC2034 # a, size, and oifs are reserved for future use
   local x y a size remainder oifs
   (( remainder = ${3} ))
   # in case someone else was messing with IFS.
@@ -59,6 +60,7 @@ do_hmac() {
   # $3 = file to hash.  uses stdin if none is given.
   # accepts input on stdin, leaves it on stdout.
   # Output is binary, if you want something else pipe it accordingly.
+  # shellcheck disable=SC2034 # keysize is reserved for future use
   local blocklen keysize x
   case "${1}" in
     sha) blocklen=64 ;;

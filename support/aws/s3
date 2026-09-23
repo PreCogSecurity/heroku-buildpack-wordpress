@@ -10,7 +10,7 @@ PATH="$basedir:$PATH"
 
 # print a message and bail
 die() {
-  echo $*
+  echo "$*"
   exit 1
 }
 
@@ -86,10 +86,12 @@ s3_signature_string() {
   # $6 = content MIME type, if any
   # $7 = canonicalized headers, if any
   # signature string will be output on stdout
+  # shellcheck disable=SC2034 # used as the message in the ${1:?verr} expansion below
   local verr="Must pass a verb to s3_signature_string!"
   local verb="${1:?verr}"
   local bucket="${3}"
   local resource="${4}"
+  # shellcheck disable=SC2034 # used as the message in the ${2:?derr} expansion below
   local derr="Must pass a date to s3_signature_string!"
   local date="${2:?derr}"
   local mime="${6}"
@@ -104,6 +106,7 @@ s3_signature_string() {
 # cheesy, but it is the best way to have multiple headers.
 curl_headers() {
   # each arg passed will be output on its own line
+  # shellcheck disable=SC2034 # parms is only used to force the loop to run
   local parms=$#
   for ((;$#;)); do
     echo "header = \"${1}\""
